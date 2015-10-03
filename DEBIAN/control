@@ -1,0 +1,8 @@
+Package: traffic-light
+Version: 1.0
+Priority: optional
+Section: python
+Maintainer: Artem Belozerov <hoongun@gmail.com>
+Architecture: all
+Depends: python (>= 2.7), python (<< 2.8), python-sqlalchemy, python-flask, python-flask-sqlalchemy
+Description: A web server, which process observations of traffic light

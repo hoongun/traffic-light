@@ -1,0 +1,11 @@
+mkdir pkg-root
+python setup.py install --install-layout=deb --prefix=/usr --root=pkg-root
+
+git clone https://github.com/jarus/flask-testing.git
+cd flask-testing
+python setup.py install --install-layout=deb --prefix=/usr --root=../pkg-root
+
+cd ../
+cp -r DEBIAN pkg-root/
+cp -r etc pkg-root/
+fakeroot dpkg --build pkg-root traffic-light.deb
