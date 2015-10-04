@@ -74,17 +74,22 @@ class State(db.Model):
             if number.value in unsuitable_values:
                 continue
 
+            # Evaluate the start number of current state
             current_number = number.value - self.step + 1
             if current_number <= 0:
                 unsuitable_values.append(number.value)
                 continue
 
+            # If start number of current state is not suitable for
+            # right number of received data - remove all states with
+            # this right number
             if not number.right_is_suitable(right_code, current_number):
                 right = number.value % 10
                 unsuitable_values += [i * 10 + right for i in xrange(10)]
                 continue
             right_missing &= number.right_missing
 
+            # Do the same as for the right number, but for left.
             if not number.left_is_suitable(left_code, current_number):
                 unsuitable_values.append(number.value)
                 continue
@@ -93,6 +98,8 @@ class State(db.Model):
         self.step += 1
         db.session.commit()
 
+        # Remove all selected states from the database
+        # which do not suit to received data
         values = None
         if unsuitable_values:
             values = Number.value.in_(unsuitable_values)
@@ -105,10 +112,12 @@ class State(db.Model):
     def red_light(self):
         value = self.step - 1
 
+        # Remove all states from the database except the real value
         unsuitable_values = Number.value != value
         self.start.filter(unsuitable_values).delete(synchronize_session=False)
         db.session.commit()
 
+        # Evaluate missings from accumulated information
         left_missing, right_missing = [0b1111111] * 2
         for number in self.start.all():
             right_missing &= number.right_missing
