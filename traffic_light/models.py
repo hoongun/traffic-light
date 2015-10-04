@@ -53,6 +53,8 @@ class State(db.Model):
     sequence = db.Column(db.String(64), unique=True)
     step = db.Column(db.Integer, default=1)
     start = db.relationship('Number', backref='state', lazy='dynamic')
+    left_working = db.Column(db.Integer, default=0)
+    right_working = db.Column(db.Integer, default=0)
 
     def __init__(self):
         self.sequence = str(uuid.uuid4())
@@ -67,6 +69,10 @@ class State(db.Model):
         db.session.commit()
 
     def green_light(self, left_code, right_code):
+        self.left_working |= left_code
+        self.right_working |= right_code
+
+        # Check all possible states of traffic light
         unsuitable_values = []
         left_missing, right_missing = [0b1111111] * 2
         for number in self.start.all():
@@ -83,14 +89,16 @@ class State(db.Model):
             # If start number of current state is not suitable for
             # right number of received data - remove all states with
             # this right number
-            if not number.right_is_suitable(right_code, current_number):
+            is_suitable = number.right_is_suitable(right_code, current_number)
+            if not is_suitable or self.right_working & number.right_missing:
                 right = number.value % 10
                 unsuitable_values += [i * 10 + right for i in xrange(10)]
                 continue
             right_missing &= number.right_missing
 
             # Do the same as for the right number, but for left.
-            if not number.left_is_suitable(left_code, current_number):
+            is_suitable = number.left_is_suitable(left_code, current_number)
+            if not is_suitable or self.left_working & number.left_missing:
                 unsuitable_values.append(number.value)
                 continue
             left_missing &= number.left_missing

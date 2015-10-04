@@ -240,12 +240,27 @@ class AcceptenceTestCase(BaseTestCase):
             ret = response.json['response']
             if ret['start'] == [start]:
                 break
-        return start, steps, ret
+        return steps, ret
 
-    # def test_acceptence(self):
-    #     print 'END', self.observation_cycle(2, 0, 0b1000010 )
-    #     print 'END', self.observation_cycle(32, 0, 0)
-    #     print 'END', self.observation_cycle(88, 0, 1)
+    def get_data(self, start, missings):
+        steps, ret = self.observation_cycle(start, *missings)
+        return (start, '[{0:07b}, {0:07b}]'.format(*missings), steps, ret)
+
+    def test_acceptence(self):
+        print ''
+
+        data = self.get_data(02, (0b0000000, 0b1000010))
+        print 'TEST n={0:02} mis={1} return "{3}" by {2} steps'.format(*data)
+
+        data = self.get_data(32, (0b0000000, 0b0000000))
+        print 'TEST n={0:02} mis={1} return "{3}" by {2} steps'.format(*data)
+
+        data = self.get_data(88, (0b0000000, 0b0000001))
+        print 'TEST n={0:02} mis={1} return "{3}" by {2} steps'.format(*data)
+
+        data = self.get_data(93, (0b1101100, 0b1111000))
+        print 'TEST n={0:02} mis={1} return "{3}" by {2} steps'.format(*data)
+
 
 
 if __name__ == '__main__':
