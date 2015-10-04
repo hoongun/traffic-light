@@ -96,7 +96,7 @@ class State(db.Model):
                 continue
             right_missing &= number.right_missing
 
-            # Do the same as for the right number, but for left.
+            # Do the same as for the right number, but for the left.
             is_suitable = number.left_is_suitable(left_code, current_number)
             if not is_suitable or self.left_working & number.left_missing:
                 unsuitable_values.append(number.value)
